@@ -7,7 +7,7 @@ class DBConnection
         username:'root',
         password:'',
         port:'3306',
-        database:'mentoria8'
+        database:'mentoria9'
     )
   end
   def query(test)
