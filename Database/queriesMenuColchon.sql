@@ -14,7 +14,7 @@ SET `available_money` = `available_money` - #{deposited_money_into_cushion}
 WHERE `storage_id` = #{savings_account_storage_id};
 
 UPDATE `cushions`
-SET `cushion_money` = `cushion_money` + #{deposited_money_into_cushion},
+SET `cushion_money` = `cushion_money` + #{deposited_money_into_cushion}
 WHERE `storage_id` = #{cushion_storage_id};
 
 2 g iii. Retirar dinero del colchón para que vuelva a estar disponible en la cuenta
@@ -27,5 +27,5 @@ SET `available_money` = `available_money` + #{withdrawn_money_from_cushion}
 WHERE `storage_id` = #{savings_account_storage_id};
 
 UPDATE `cushions`
-SET `cushion_money` = `cushion_money` - #{withdrawn_money_from_cushion},
+SET `cushion_money` = `cushion_money` - #{withdrawn_money_from_cushion}
 WHERE `storage_id` = #{cushion_storage_id};
