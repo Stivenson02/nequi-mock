@@ -1,15 +1,15 @@
 CREATE TABLE `users` (
     `id` INTEGER AUTO_INCREMENT PRIMARY KEY,
     `name` VARCHAR(100) NOT NULL,
-    `email` VARCHAR(40) NOT NULL UNIQUE,
-    `password` VARCHAR(50) NOT NULL,
+    `email` VARCHAR(100) NOT NULL UNIQUE,
+    `password` VARCHAR(100) NOT NULL,
     `registration_timestamp` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     `is_active` BOOLEAN DEFAULT TRUE
 );
     
 CREATE TABLE `types_of_money_storages` (
     `id` INTEGER AUTO_INCREMENT PRIMARY KEY,
-    `type_name` VARCHAR(20) NOT NULL
+    `type_name` VARCHAR(30) NOT NULL
 );
 
 CREATE TABLE `money_storages` (
@@ -27,7 +27,7 @@ CREATE TABLE `savings_accounts` (
 CREATE TABLE `pockets` (
     `storage_id` INTEGER PRIMARY KEY REFERENCES money_storages,
     `account_id` INTEGER NOT NULL REFERENCES savings_accounts,
-    `name` VARCHAR(20) NOT NULL,
+    `name` VARCHAR(30) NOT NULL,
     `saved_money` INTEGER NOT NULL DEFAULT 0,
     `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     `deleted_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -37,13 +37,14 @@ CREATE TABLE `pockets` (
 CREATE TABLE `goals` (
     `storage_id` INTEGER PRIMARY KEY REFERENCES money_storages,
     `account_id` INTEGER NOT NULL REFERENCES savings_accounts,
-    `name` VARCHAR(20) NOT NULL,
+    `name` VARCHAR(30) NOT NULL,
     `target_date` DATE NOT NULL,
     `target_money` INTEGER NOT NULL,
     `saved_money` INTEGER NOT NULL DEFAULT 0,
+    `was_achieved` BOOLEAN NOT NULL DEFAULT FALSE,
     `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     `deleted_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    `is_active` BOOLEAN DEFAULT TRUE
+    `is_active` BOOLEAN NOT NULL DEFAULT TRUE
 );
 
 CREATE TABLE `cushions` (
@@ -54,7 +55,7 @@ CREATE TABLE `cushions` (
 
 CREATE TABLE `transactions` (
     `id` INTEGER AUTO_INCREMENT PRIMARY KEY,
-    `source_storage_id` INTEGER NOT NULL REFERENCES money_storages, 
+    `source_storage_id` INTEGER REFERENCES money_storages, 
     `destination_storage_id` INTEGER REFERENCES money_storages,
     `money_transferred` INTEGER NOT NULL,
     `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
