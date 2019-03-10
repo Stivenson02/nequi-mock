@@ -5,15 +5,19 @@ class TestSelect
     @dbconnection = DBConnection.new()
   end
   def selectTest
-    results=@dbconnection.query("SELECT* FROM jobs");
+    results=@dbconnection.query("SELECT * FROM users");
     results.each do |row|
-      puts row["JOB_ID"] # row["id"].is_a? Integer
+      puts row # row["id"].is_a? Integer
     end
   end
+
+  def insertTest
+    @dbconnection.query("INSERT INTO users(name, email, password) VALUES('NombrePrueba', 'Email@prueba.com', 'contra');");
+  end
+
 end
 
 #init
 object = TestSelect.new()
 object.selectTest
-
-
+object.insertTest
