@@ -5,13 +5,12 @@ class DBConnection
     @client = Mysql2::Client.new(
         host:'localhost',
         username:'root',
-        password:'test',
+        password:'',
         port:'3306',
-        database:'mentoria9'
+        database:'test'
     )
   end
   def query(test)
-    puts test
     results = @client.query(test)
     return  results
   end

@@ -1,17 +1,18 @@
 require_relative 'mysql2.rb'
 
-class Users
+class Bolsillo
   def initialize()
     @dbconnection = DBConnection.new()
   end
-  def menu
+  def menu(user_id)
+    @user_id=user_id
     print "
 		Seleccione \n
 		1- Registrar Usuario \n
 		2- Login"
     $selection = gets
     if $selection.to_i == 1
-     return registerUser()
+      return registerUser()
     elsif $selection.to_i == 2
       return loginUser()
     else
@@ -24,10 +25,12 @@ class Users
     $email= gets
     puts "Nombre"
     $name= gets
+    puts "Apellido"
+    $lastname= gets
     puts "Password"
     $passw= gets
-    time = Time.new
-    results=@dbconnection.query("INSERT INTO `test`.`users` (`name`, `email`, `password`, `registration_timestamp`, `logout`) VALUES ('#{$name}', '#{$email}', '#{$passw}', '#{time}', '1')")
+    time1 = Time.new
+    results=@dbconnection.query("INSERT INTO `mentoria9`.`users` (`email`, `name`, `last_name`, `password`, `is_active`, `logout`, `created_at`, `updated_at`) VALUES ('#{$email}', '#{$name}', '#{$lastname}', '#{$passw}', '1', '1', '#{time1.inspect}', '#{time1.inspect}')")
     results=@dbconnection.query("SELECT* FROM users  ORDER BY id DESC LIMIT 1")
     results.each do |row|
       puts  # row["id"].is_a? Integer
@@ -70,7 +73,6 @@ class Users
       return  0
     end
   end
-
 end
 
 
