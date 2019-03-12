@@ -1,8 +1,8 @@
-require_relative 'mysql2.rb'
+require_relative 'DbConnection.rb'
 
 class Bolsillo
   def initialize()
-    @dbconnection = DBConnection.new()
+    @dbconnection = DbConnection.new()
   end
   def menu(user_id)
     @user_id=user_id

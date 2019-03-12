@@ -1,8 +1,8 @@
-require_relative 'mysql2.rb'
+require_relative 'DbConnection.rb'
 
 class Users
   def initialize()
-    @dbconnection = DBConnection.new()
+    @dbconnection = DbConnection.new()
   end
   def menu
     print "
