@@ -50,10 +50,12 @@ class Menu
     puts "Bolsillo"
   end
   def Bolsillo()
-    @classBolsillo.menu()
+   $cuenta= @classCuenta.VerCuenta(@user_id)
+   puts "CUENTA"
+   puts $cuenta
   end
   def Metas()
-    @classMetas.menu()
+    @classMetas.menu(@user_id)
   end
 end
 

@@ -12,7 +12,7 @@ class Cuenta
 		2- Agregar Dinero"
     $selection = gets
     if $selection.to_i == 1
-      return VerCuenta()
+      return VerCuenta(user_id)
     elsif $selection.to_i == 2
       return Agregar()
     else
@@ -20,17 +20,16 @@ class Cuenta
       menu()
     end
   end
-  def VerCuenta()
-
-    results=@dbconnection.query("SELECT* FROM savings_accounts WHERE user_id = #{@user_id}")
+  def VerCuenta(user_id)
+    results=@dbconnection.query("SELECT* FROM savings_accounts WHERE user_id = #{user_id}")
     results.each do |row|
-      $total=  row['total_money']
-      $available=  row['available_money']
+      $data= row
+      puts "Total en la cuenta"
+      puts  row['total_money']
+      puts "Total en la disponible"
+      puts  row['available_money']
     end
-    puts "Total en la cuenta"
-    $total
-    puts "Total en la disponible"
-    $available
+    return $data
   end
   def Agregar()
     print "Valor"

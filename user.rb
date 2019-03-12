@@ -70,7 +70,6 @@ class Users
       return  0
     end
   end
-
 end
 
 
