@@ -2,7 +2,7 @@
 
 SELECT `name`, `target_money`, `saved_money`, `target_money`-`saved_money` AS `remaining_money`, `was_achieved`, CURRENT_TIMESTAMP < `target_date`, `target_date`
 FROM `goals`
-WHERE `storage_id` = #{savings_account_storage_id}
+WHERE `account_id` = #{savings_account_storage_id}
 
 2 i ii. Crear una nueva meta. Nombre, monto total y fecha límite.
 
@@ -34,14 +34,14 @@ VALUES(#{goal_storage_id}, #{savings_account_storage_id}, @goal_money);
 2 i iv. Agregar dinero a una meta
 
 UPDATE `goals`
-SET `saved_money` = #{deposited_money_into_goal}
+SET `saved_money` = `saved_money` + #{deposited_money_into_goal}
 WHERE `storage_id` = #{goal_storage_id};
 
 UPDATE `savings_accounts`
-SET `available_money` = `available_money` - #{deposited_money_into_goal},
+SET `available_money` = `available_money` - #{deposited_money_into_goal}
 WHERE `storage_id` = #{savings_account_storage_id};
 
-INSERT INTO `transactions`(`source_storage_id`, `destination_storage_id`, `money_transferred`))
+INSERT INTO `transactions`(`source_storage_id`, `destination_storage_id`, `money_transferred`)
 VALUES(#{savings_account_storage_id}, #{goal_storage_id}, #{deposited_money_into_goal});
 
 
