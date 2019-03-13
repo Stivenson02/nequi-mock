@@ -6,20 +6,24 @@ class CushionMenu
         puts "3. Retirar dinero del colchón"
         puts "4. Regresar al menú anterior"
         print "Selecciona una opción: "
-        option = gets()
+        option = gets().delete!("\r\n\\")
+        puts ""
         option
     end
     def look_up_cushion_money(cushion_money)
         puts "El dinero guardado en tu colchón es: #{cushion_money}"
+        puts ""
     end
     def deposit_money_into_cushion
         puts "Ingresa la cantidad de dinero que deseas depositar en el colchón: "
-        deposited_money = gets()
+        deposited_money = gets().delete!("\r\n\\")
+        puts ""
         deposited_money
     end
     def withdraw_money_from_cushion
         puts "Ingresa la cantidad de dinero que deseas retirar de tu colchón: "
-        withdrawn_money = gets()
+        withdrawn_money = gets().delete!("\r\n\\")
+        puts ""
         withdrawn_money
     end
 end

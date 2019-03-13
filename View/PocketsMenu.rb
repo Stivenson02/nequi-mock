@@ -10,6 +10,7 @@ class PocketsMenu
         puts "7. Regresar al menú anterior"
         print "Selecciona una opción: "
         option = gets()
+        puts ""
         option
     end
     def list_pockets(pockets_array)
@@ -20,38 +21,44 @@ class PocketsMenu
             saved_money = pocket[:saved_money]
             puts "#{index+1}. Nombre del bolsillo: '#{name}', Dinero guardado: #{saved_money}"
         }
+        puts ""
     end
     def create_pocket
         puts "Ingresa el nombre para el nuevo bolsillo: "
-        name = gets()
+        name = gets().delete!("\r\n\\")
+        puts ""
         name
     end
     def delete_pocket
         puts "Selecciona el índice del bolsillo que quieres eliminar: "
-        index = gets()
+        index = gets().delete!("\r\n\\")
+        puts ""
         index
     end
     def deposit_into_pocket
         puts "Ingresa el índice del bolsillo en el que quieres depositar: "
-        index = gets()
+        index = gets().delete!("\r\n\\")
         puts "Ingresa la cantidad de dinero que quieres depositar: "
-        deposited_money = gets()
+        deposited_money = gets().delete!("\r\n\\")
+        puts ""
         [index, deposited_money]
     end
     def withdraw_from_pocket
         puts "Ingresa el índice del bolsillo del que quieres retirar dinero: "
-        index = gets()
+        index = gets().delete!("\r\n\\")
         puts "Ingresa la cantidad de dinero que quieres retirar: "
-        withdrawn_money = gets()
+        withdrawn_money = gets().delete!("\r\n\\")
+        puts ""
         [index, withdrawn_money]
     end
     def send_money_from_pocket_to_another_user_savings_account
         puts "Ingresa el índice del bolsillo del que quieres enviar el dinero: "
-        index = gets()
+        index = gets().delete!("\r\n\\")
         puts "Ingresa el email del destinatario: "
-        email = gets()
+        email = gets().delete!("\r\n\\")
         puts "Ingresa la cantidad de dinero que deseas enviar al destinatario: "
-        sent_money = gets()
+        sent_money = gets().delete!("\r\n\\")
+        puts ""
         [index, email, sent_money]
     end
 end

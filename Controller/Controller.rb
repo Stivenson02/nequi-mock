@@ -65,9 +65,11 @@ class Controller
         option = Integer(@main_menu.main_menu(@user_name))
         if option == 1
             look_up_available_money()
+            gets()
             main_menu()
         elsif option == 2
             look_up_total_money()
+            gets()
             main_menu()
         elsif option == 3
             deposit_into_savings_account()
@@ -80,6 +82,7 @@ class Controller
             main_menu()
         elsif option == 6
             transactions_history()
+            gets()
             main_menu()
         elsif option == 7
             cushion_menu()
@@ -158,6 +161,7 @@ class Controller
         option = Integer(@cushion_menu.cushion_menu)
         if option == 1
             look_up_cushion_money()
+            gets()
             cushion_menu()
         elsif option == 2
             deposit_money_into_cushion()
@@ -184,6 +188,97 @@ class Controller
         @cushions_access.withdraw_from_cushion(withdrawn_money, @cushion_storage_id)
     end
 
+
+    def pockets_menu
+        option = Integer(@pockets_menu.pockets_menu)
+        if option == 1
+            list_pockets()
+            gets()
+            pockets_menu()
+        elsif option == 2
+            create_pocket()
+            pockets_menu()
+        elsif option == 3
+            delete_pocket()
+            pockets_menu()
+        elsif option == 4
+            deposit_into_pocket()
+            pockets_menu()
+        elsif option == 5
+            withdraw_from_pocket()
+            pockets_menu()
+        elsif option == 6
+            send_money_from_pocket_to_another_user_savings_account()
+            pockets_menu()
+        elsif option == 7
+            main_menu()
+        else
+            puts "Error: Ingrese una opción válida"
+        end
+    end
+
+    def list_pockets
+        pockets_array = @pockets_access.list_pockets(@savings_account_storage_id)
+        @pockets_menu.list_pockets(pockets_array)
+    end
+
+    def create_pocket
+        pocket_name = @pockets_menu.create_pocket
+        @pockets_access.create_pocket(pocket_name, @savings_account_storage_id)
+    end
+
+    def delete_pocket
+        list_pockets()
+        index = Integer(@pockets_menu.delete_pocket)
+        pockets_array = @pockets_access.list_pockets(@savings_account_storage_id)
+        if index <= pockets_array.length
+            pocket_storage_id = pockets_array[index-1][:storage_id]
+            @pockets_access.delete_pocket(pocket_storage_id)
+        else
+            puts "Error: Ingrese una opción válida"
+        end
+    end
+
+    def deposit_into_pocket
+        list_pockets()
+        index, deposited_money = @pockets_menu.deposit_into_pocket()
+        index = Integer(index)
+        deposited_money = Integer(deposited_money)
+        pockets_array = @pockets_access.list_pockets(@savings_account_storage_id)
+        if index <= pockets_array.length
+            pocket_storage_id = pockets_array[index-1][:storage_id]
+            @pockets_access.deposit_into_pocket(deposited_money, pocket_storage_id)
+        else
+            puts "Error: Ingrese una opción válida"
+        end
+    end
+
+    def withdraw_from_pocket
+        list_pockets()
+        index, withdrawn_money = @pockets_menu.withdraw_from_pocket()
+        index = Integer(index)
+        withdrawn_money = Integer(withdrawn_money)
+        pockets_array = @pockets_access.list_pockets(@savings_account_storage_id)
+        if index <= pockets_array.length
+            pocket_storage_id = pockets_array[index-1][:storage_id]
+            @pockets_access.withdraw_from_pocket(withdrawn_money, pocket_storage_id)
+        else
+            puts "Error: Ingrese una opción válida"
+        end
+    end
+
+    def send_money_from_pocket_to_another_user_savings_account
+        list_pockets()
+        index, recipient_email, sent_money = @pockets_menu.send_money_from_pocket_to_another_user_savings_account()
+        index = Integer(index)
+        pockets_array = @pockets_access.list_pockets(@savings_account_storage_id)
+        if index <= pockets_array.length
+            pocket_storage_id = pockets_array[index-1][:storage_id]
+            @pockets_access.send_money_to_another_user_savings_account(recipient_email, sent_money, pocket_storage_id)
+        else
+            puts "Error: Ingrese una opción válida"
+        end
+    end
 end
 
 controller = Controller.new()

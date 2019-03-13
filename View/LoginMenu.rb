@@ -5,6 +5,7 @@ class LoginMenu
         puts "2. Registrarse"
         print "Selecciona una opción: "
         option = gets()
+        puts ""
         option
     end
     def user_registration
@@ -14,6 +15,7 @@ class LoginMenu
         email = gets().delete!("\r\n\\")
         puts "Ingresa tu contraseña: "
         password = gets().delete!("\r\n\\")
+        puts ""
         [name, email, password]
     end
     def login
@@ -21,6 +23,7 @@ class LoginMenu
         email = gets().delete!("\r\n\\")
         puts "Ingresa tu contraseña: "
         password = gets().delete!("\r\n\\")
+        puts ""
         [email, password]
     end
 end
