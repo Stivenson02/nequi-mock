@@ -1,24 +1,30 @@
-require_relative 'DbConnection.rb'
-
 class UsersAccess
     def initialize(db_connection)
         @db_connection = db_connection
     end
 
-    def user_login(email, password)
-        result = @db_connection.client.query("SELECT `id` FROM  `users` WHERE `email` = '#{email}' AND `password` = '#{password}';", :symbolize_keys => true)
-        result
+    def login(email, password)
+        results = @db_connection.client.query("CALL `login`('#{email}', '#{password}');", :symbolize_keys => true)
+        results.to_a
+    end
+
+    def user_registration(name, email, password)
+        @db_connection.client.query("CALL `register_user`('#{name}','#{email}','#{password}');")
     end
 end
 
-db_connection = DbConnection.new()
-users_access = UsersAccess.new(db_connection)
-#results = users_access.user_login('sergioal@gmail.com','1234bb')
-results = users_access.user_login('stiven@hotmail.com','galaxia')
-key = results.fields[0]
-idHash = nil
-results.each do |row|
-    idHash = row
-end
-id = idHash[key]
-puts id
+#tests
+
+# #db_connection and class object
+# db_connection = DbConnection.new()
+# users_access = UsersAccess.new(db_connection)
+
+# #test user_registration
+# users_access.user_registration('stiven','stiven@gmail.com','1234')
+# db_connection.client.abandon_results!
+
+# #test login
+# puts users_access.login('stiven@gmail.com', '1234')
+# db_connection.client.abandon_results!
+
+# #db_connection.client.abandon_results!  Se usa para poder llamar varios stored procedures en sucesión rápida
