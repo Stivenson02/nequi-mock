@@ -26,7 +26,7 @@ class Cuenta
       $data= row
       puts "Total en la cuenta"
       puts  row['total_money']
-      puts "Total en la disponible"
+      puts "Total disponible"
       puts  row['available_money']
     end
     return $data
@@ -45,7 +45,7 @@ class Cuenta
     end
     if ($tlid == 0)
       results=@dbconnection.query("INSERT INTO `test`.`money_storages` (`type_id`) VALUES ('1')")
-      results=@dbconnection.query("SELECT* FROM users  ORDER BY id DESC LIMIT 1")
+      results=@dbconnection.query("SELECT* FROM money_storages  ORDER BY id DESC LIMIT 1")
       results.each do |row|
         puts  # row["id"].is_a? Integer
         @tipe_id = row['id']

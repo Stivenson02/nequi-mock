@@ -51,8 +51,7 @@ class Menu
   end
   def Bolsillo()
    $cuenta= @classCuenta.VerCuenta(@user_id)
-   puts "CUENTA"
-   puts $cuenta
+   @classBolsillo.menu(@user_id, $cuenta['storage_id'] )
   end
   def Metas()
     @classMetas.menu(@user_id)
