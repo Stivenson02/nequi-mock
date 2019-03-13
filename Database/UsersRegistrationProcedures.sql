@@ -39,7 +39,7 @@ DROP PROCEDURE IF EXISTS `login`;
 DELIMITER //
 CREATE PROCEDURE `login`(IN `user_email` VARCHAR(100), IN `user_password` VARCHAR(100))
     BEGIN 
-    SELECT `u`.`id` AS 'user_id', `sa`.`storage_id` AS 'savings_account_storage_id', `c`.`storage_id` AS 'cushion_storage_id' 
+    SELECT `u`.`name`, `u`.`id` AS 'user_id', `sa`.`storage_id` AS 'savings_account_storage_id', `c`.`storage_id` AS 'cushion_storage_id' 
     FROM  `users` AS `u`
     JOIN `savings_accounts` AS `sa`
     ON `sa`.`user_id` = `u`.`id`

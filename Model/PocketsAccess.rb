@@ -6,27 +6,33 @@ class PocketsAccess
 
     def list_pockets(savings_account_storage_id)
         results = @db_connection.client.query("CALL `list_pockets`(#{savings_account_storage_id});", :symbolize_keys => true)
+        @db_connection.client.abandon_results!
         results.to_a
     end
 
     def create_pocket(pocket_name, savings_account_storage_id)
         results = @db_connection.client.query("CALL `create_pocket`('#{pocket_name}', #{savings_account_storage_id});")
+        @db_connection.client.abandon_results!
     end
 
     def delete_pocket(pocket_storage_id)
         results = @db_connection.client.query("CALL `delete_pocket`(#{pocket_storage_id});")
+        @db_connection.client.abandon_results!
     end
 
     def deposit_into_pocket(deposited_money, pocket_storage_id)
         results = @db_connection.client.query("CALL `deposit_into_pocket`(#{deposited_money}, #{pocket_storage_id});")
+        @db_connection.client.abandon_results!
     end
 
     def withdraw_from_pocket(withdrawn_money, pocket_storage_id)
         results = @db_connection.client.query("CALL `withdraw_from_pocket`(#{withdrawn_money}, #{pocket_storage_id});")
+        @db_connection.client.abandon_results!
     end
 
     def send_money_to_another_user_savings_account(recipient_email, sent_money, pocket_storage_id)
         results = @db_connection.client.query("CALL `send_money_from_pocket_to_another_user_savings_account`('#{recipient_email}', #{sent_money}, #{pocket_storage_id});")
+        @db_connection.client.abandon_results!
     end
 end
 
