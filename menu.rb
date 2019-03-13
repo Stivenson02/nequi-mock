@@ -15,6 +15,7 @@ class Menu
     if (@user_id != 0)
       print "
 		Seleccione \n
+		0- Salir  \n
 		1- Cuenta  \n
 		2- Transaccion \n
 		3- Colchon \n
@@ -31,6 +32,8 @@ class Menu
         Bolsillo()
       elsif $selection.to_i == 5
         Metas()
+      elsif $selection.to_i == 0
+        Logout()
       else
         puts "ERROR SELECCIONE UN CAMPO VALIDO"
         menu()
@@ -51,11 +54,15 @@ class Menu
   end
   def Bolsillo()
    $cuenta= @classCuenta.VerCuenta(@user_id)
-   puts "CUENTA"
-   puts $cuenta
+   @classBolsillo.menu(@user_id, $cuenta['storage_id'] )
   end
   def Metas()
     @classMetas.menu(@user_id)
+  end
+  def Logout()
+    @classUser.logout(@user_id)
+    @user_id = 0
+
   end
 end
 

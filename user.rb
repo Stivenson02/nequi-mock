@@ -56,6 +56,10 @@ class Users
     results=@dbconnection.query("UPDATE `users` SET `logout`='#{login}' WHERE  `id`=#{$id_user}")
     return validate($id_user)
   end
+  def logout(user_id)
+    results=@dbconnection.query("UPDATE `users` SET `logout`='0' WHERE  `id`=#{user_id}")
+    return validate(user_id)
+  end
   def validate (user_id_login)
     results=@dbconnection.query("SELECT * FROM users WHERE id = #{user_id_login}")
     results.each do |row|
