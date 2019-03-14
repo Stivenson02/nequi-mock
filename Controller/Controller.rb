@@ -59,6 +59,7 @@ class Controller
     def user_registration
         name, email, password = @login_menu.user_registration()
         @users_access.user_registration(name, email, password)
+        login_menu()
     end
 
     def main_menu
