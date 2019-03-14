@@ -279,6 +279,63 @@ class Controller
             puts "Error: Ingrese una opción válida"
         end
     end
+
+    def goals_menu
+        option = Integer(@goals_menu.goals_menu)
+        if option == 1
+            list_goals()
+            gets()
+            goals_menu()
+        elsif option == 2
+            create_goal()
+            goals_menu()
+        elsif option == 3
+            delete_goal()
+            goals_menu()
+        elsif option == 4
+            deposit_into_goal()
+            goals_menu()
+        elsif option == 5
+            main_menu()
+        else
+            puts "Error: Ingrese una opción válida"
+        end
+    end
+
+    def list_goals
+        goals_array = @goals_access.list_goals(@savings_account_storage_id)
+        @goals_menu.list_goals(goals_array)
+    end
+
+    def create_goal
+        name, target_money, target_date = @goals_menu.create_goal()
+        @goals_access.create_goal(name, target_date, target_money, @savings_account_storage_id)
+    end
+
+    def delete_goal
+        list_goals()
+        index = Integer(@goals_menu.delete_goal)
+        goals_array = @goals_access.list_goals(@savings_account_storage_id)
+        if index <= goals_array.length
+            goal_storage_id = goals_array[index-1][:storage_id]
+            @goals_access.delete_goal(goal_storage_id)
+        elsif
+            puts "Error: Ingrese una opción válida"
+        end
+    end
+
+    def deposit_into_goal
+        list_goals()
+        index, deposited_money = @goals_menu.deposit_into_goal
+        index = Integer(index)
+        goals_array = @goals_access.list_goals(@savings_account_storage_id)
+        if index <= goals_array.length
+            goal_storage_id = goals_array[index-1][:storage_id]
+            @goals_access.deposit_into_goal(deposited_money, goal_storage_id)
+        elsif
+            puts "Error: Ingrese una opción válida"
+        end
+    end
 end
 
 controller = Controller.new()

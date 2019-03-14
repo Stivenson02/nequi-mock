@@ -5,19 +5,23 @@ class GoalsAccess
 
     def list_goals(savings_account_storage_id)
         results = @db_connection.client.query("CALL `list_goals`(#{savings_account_storage_id});", :symbolize_keys => true)
+        @db_connection.client.abandon_results!
         results.to_a
     end
 
     def create_goal(goal_name, target_date, target_money, savings_account_storage_id)
         results = @db_connection.client.query("CALL `create_goal`('#{goal_name}', '#{target_date}', #{target_money}, #{savings_account_storage_id});")
+        @db_connection.client.abandon_results!
     end
 
     def delete_goal(goal_storage_id)
         results = @db_connection.client.query("CALL `delete_goal`(#{goal_storage_id});")
+        @db_connection.client.abandon_results!
     end
 
     def deposit_into_goal(deposited_money, goal_storage_id)
         results = @db_connection.client.query("CALL `deposit_into_goal`(#{deposited_money}, #{goal_storage_id});")
+        @db_connection.client.abandon_results!
     end
 end
 
