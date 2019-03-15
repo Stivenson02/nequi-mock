@@ -48,7 +48,6 @@ class MainMenu
     end
     def history_of_personal_deposits_into_sa(history_array)
         puts "DEPÓSITOS PERSONALES EN LA CUENTA DE AHORROS"
-        puts ""
         history_array.each{
             |transaction|
             deposited_money = transaction[:money_transferred]

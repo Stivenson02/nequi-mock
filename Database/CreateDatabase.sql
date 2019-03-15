@@ -6,7 +6,8 @@ CREATE TABLE `users` (
     `id` INTEGER AUTO_INCREMENT PRIMARY KEY,
     `name` VARCHAR(100) NOT NULL,
     `email` VARCHAR(100) NOT NULL UNIQUE,
-    `password` VARCHAR(100) NOT NULL,
+    `password_hash` BINARY(64),
+    `salt` BINARY(16),
     `registration_timestamp` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     `is_active` BOOLEAN DEFAULT TRUE
 );
@@ -84,10 +85,15 @@ DROP PROCEDURE IF EXISTS `register_user`;
 DELIMITER //
 CREATE PROCEDURE `register_user`(IN `new_name` VARCHAR(100), IN `new_email` VARCHAR(100), IN `new_password` VARCHAR(100))
     BEGIN
-    INSERT INTO `users`(`name`, `email`, `password`) 
-    VALUES(`new_name`, `new_email`, `new_password`);
+
+    SET @salt = UNHEX(MD5(RAND()));
+    
+    INSERT INTO `users`(`name`, `email`, `salt`) 
+    VALUES(`new_name`, `new_email`, @salt);
 
     SET @user_id = LAST_INSERT_ID();
+
+    UPDATE `users` SET `password_hash` = UNHEX(SHA2(CONCAT(`new_password`,@salt),512)) WHERE `id` = @user_id;
 
     INSERT INTO `money_storages`(`type_id`) 
     VALUES((SELECT `ts`.`id` FROM `types_of_money_storages` AS `ts` 
@@ -121,7 +127,7 @@ CREATE PROCEDURE `login`(IN `user_email` VARCHAR(100), IN `user_password` VARCHA
     ON `sa`.`user_id` = `u`.`id`
     JOIN `cushions` AS `c`
     ON `c`.`account_id` = `sa`.`storage_id` 
-    WHERE `email` = `user_email` AND `password` = `user_password`;
+    WHERE `u`.`email` = `user_email` AND UNHEX(SHA2(CONCAT(`user_password`, `u`.`salt`), 512)) = `u`.`password_hash`;
     END//
 DELIMITER ;
 
