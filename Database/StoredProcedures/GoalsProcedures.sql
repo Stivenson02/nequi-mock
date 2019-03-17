@@ -65,8 +65,6 @@ DELIMITER ;
 CALL `delete_goal`(#{goal_storage_id});
 */
 
-
-
 /*2 i iv. Agregar dinero a una meta*/
 
 DROP PROCEDURE IF EXISTS `deposit_into_goal`;
@@ -76,7 +74,10 @@ CREATE PROCEDURE `deposit_into_goal`(IN `deposited_money` INTEGER, IN `goal_stor
     SET @savings_account_storage_id = (SELECT `account_id`
                         FROM `goals`
                         WHERE `storage_id` = `goal_storage_id`);
-
+    IF (SELECT `available_money` FROM `savings_accounts` WHERE `storage_id` = @savings_account_storage_id) < `deposited_money` THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Deposited money can\'t be greater than the available money in the savings account';
+    END IF;
     UPDATE `goals`
     SET `saved_money` = `saved_money` + `deposited_money`
     WHERE `storage_id` = `goal_storage_id`;
@@ -98,6 +99,21 @@ DELIMITER ;
 /*Query to call procedure
 CALL `deposit_into_goal`(#{deposited_money}, #{goal_storage_id});
 */
+
+/* Validate that input date has the right format and range*/
+
+DROP PROCEDURE IF EXISTS `validate_date`;
+DELIMITER //
+CREATE PROCEDURE `validate_date`(IN `input_date` DATE)
+    BEGIN
+    IF `input_date` BETWEEN CURRENT_DATE + INTERVAL 1 DAY AND '2029-12-31' THEN
+        SELECT 1 AS `valid_date`;
+    ELSE
+        SELECT 0 AS `valid_date`;
+    END IF;
+    END //
+DELIMITER ;
+
 
 
 

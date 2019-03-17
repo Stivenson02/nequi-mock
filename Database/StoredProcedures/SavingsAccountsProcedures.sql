@@ -54,6 +54,10 @@ DROP PROCEDURE IF EXISTS `withdraw_from_savings_account`;
 DELIMITER //
 CREATE PROCEDURE `withdraw_from_savings_account`(IN `withdrawn_money` INTEGER, IN `savings_account_storage_id` INTEGER)
     BEGIN
+    IF (SELECT `available_money` FROM `savings_accounts` WHERE `storage_id` = `savings_account_storage_id`) < `withdrawn_money` THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Withdrawn money can\'t be greater than the available money in the savings account';
+    END IF;
     UPDATE `savings_accounts`
     SET `available_money` = `available_money` - `withdrawn_money`,
     `total_money` = `total_money` - `withdrawn_money`
@@ -74,6 +78,10 @@ DROP PROCEDURE IF EXISTS `send_money_from_savings_account_to_another_user_saving
 DELIMITER //
 CREATE PROCEDURE `send_money_from_savings_account_to_another_user_savings_account`(IN `recipient_email` VARCHAR(100), IN `sent_money` INTEGER, IN `savings_account_storage_id` INTEGER)
     BEGIN
+    IF (SELECT `available_money` FROM `savings_accounts` WHERE `storage_id` = `savings_account_storage_id`) < `sent_money` THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Sent money can\'t be greater than the available money in the savings account';
+    END IF;
     SET @destination_user_id = (SELECT `id` 
                                 FROM `users` 
                                 WHERE `email` = `recipient_email`);
@@ -99,4 +107,23 @@ DELIMITER ;
 
 /*Query to call procedure
 CALL `send_money_from_savings_account_to_another_user_savings_account`('#{recipient_email}', #{sent_money}, #{savings_account_storage_id})
+*/
+
+/*Checks if email exists*/
+
+DROP PROCEDURE IF EXISTS `email_exists`;
+DELIMITER //
+CREATE PROCEDURE `email_exists`(IN `user_email` VARCHAR(100))
+    BEGIN 
+	SET @val = (SELECT COUNT(`id`) FROM `users` WHERE `email` = `user_email` GROUP BY `id`);
+    IF @val IS NULL THEN
+		SELECT 0 AS `exists`;
+	ELSE
+		SELECT 1 AS `exists`;
+	END IF;
+    END//
+DELIMITER ;
+
+/*Query to call procedure
+CALL `email_exists`(#{email})
 */

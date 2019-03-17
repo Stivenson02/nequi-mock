@@ -30,33 +30,9 @@ class SavingsAccountsAccess
         @db_connection.client.query("CALL `send_money_from_savings_account_to_another_user_savings_account`('#{recipient_email}', #{sent_money}, #{savings_account_storage_id})")
         @db_connection.client.abandon_results!
     end
+    def email_exists(email)
+        results = @db_connection.client.query("CALL `email_exists`('#{email}');", :symbolize_keys => true)
+        @db_connection.client.abandon_results!
+        results.to_a[0][:exists] == 1 ? (return true) : (return false)
+    end
 end
-
-#tests
-
-# db_connection = DbConnection.new()
-# savings_accounts_access = SavingsAccountsAccess.new(db_connection)
-
-# savings_accounts_access.deposit_into_savings_account(5000000, 1)
-# db_connection.client.abandon_results!
-
-# savings_accounts_access.withdraw_from_savings_account(2000000, 1)
-# db_connection.client.abandon_results!
-
-# savings_accounts_access.send_to_another_user_savings_account('stiven@gmail.com', 1000000, 1)
-# db_connection.client.abandon_results!
-
-# savings_accounts_access.send_to_another_user_savings_account('sergio@gmail.com', 500000, 3)
-# db_connection.client.abandon_results!
-
-# puts savings_accounts_access.look_up_available_money(1)
-# db_connection.client.abandon_results!
-
-# puts savings_accounts_access.look_up_total_money(1)
-# db_connection.client.abandon_results!
-
-# puts savings_accounts_access.look_up_available_money(3)
-# db_connection.client.abandon_results!
-
-# puts savings_accounts_access.look_up_total_money(3)
-# db_connection.client.abandon_results!
