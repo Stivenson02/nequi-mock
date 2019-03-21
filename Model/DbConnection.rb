@@ -6,11 +6,12 @@ class DbConnection
 
   def initialize
     @client = Mysql2::Client.new(
-        host:'localhost',
+        host:'127.0.0.1',
         username:'root',
-        password:'',
-        port:'3306',
-        database:'test'
+        password:'test',
+        port:'33060',
+        database:'nequi_mock',
+        :flags => Mysql2::Client::MULTI_STATEMENTS
     )
   end
   def query(test)
