@@ -72,7 +72,10 @@ CREATE PROCEDURE `deposit_into_pocket`(IN `deposited_money` INTEGER, IN `pocket_
     SET @savings_account_storage_id = (SELECT `account_id`
                         FROM `pockets`
                         WHERE `storage_id` = `pocket_storage_id`);
-
+    IF (SELECT `available_money` FROM `savings_accounts` WHERE `storage_id` = @savings_account_storage_id) < `deposited_money` THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Deposited money can\'t be greater than the available money in the savings account';
+    END IF;
     UPDATE `pockets`
     SET `saved_money` = `saved_money` + `deposited_money`
     WHERE `storage_id` = `pocket_storage_id`;
@@ -96,6 +99,10 @@ DROP PROCEDURE IF EXISTS `withdraw_from_pocket`;
 DELIMITER //
 CREATE PROCEDURE `withdraw_from_pocket`(IN `withdrawn_money` INTEGER, IN `pocket_storage_id` INTEGER)
     BEGIN
+    IF (SELECT `saved_money` FROM `pockets` WHERE `storage_id` = `pocket_storage_id`) < `withdrawn_money` THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Withdrawn money can\'t be greater than the money stored in the pocket';
+    END IF;
     SET @savings_account_storage_id = (SELECT `account_id`
                         FROM `pockets`
                         WHERE `storage_id` = `pocket_storage_id`);
@@ -123,6 +130,10 @@ DROP PROCEDURE IF EXISTS `send_money_from_pocket_to_another_user_savings_account
 DELIMITER //
 CREATE PROCEDURE `send_money_from_pocket_to_another_user_savings_account`(IN `recipient_email` VARCHAR(100), IN `sent_money` INTEGER, IN `pocket_storage_id` INTEGER)
     BEGIN
+    IF (SELECT `saved_money` FROM `pockets` WHERE `storage_id` = `pocket_storage_id`) < `sent_money` THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Sent money can\'t be greater than the money stored in the pocket';
+    END IF;
     SET @destination_user_id = (SELECT `id` 
                                 FROM `users` 
                                 WHERE `email` = `recipient_email`);

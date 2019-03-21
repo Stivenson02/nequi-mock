@@ -6,7 +6,8 @@ CREATE TABLE `users` (
     `id` INTEGER AUTO_INCREMENT PRIMARY KEY,
     `name` VARCHAR(100) NOT NULL,
     `email` VARCHAR(100) NOT NULL UNIQUE,
-    `password` VARCHAR(100) NOT NULL,
+    `password_hash` BINARY(64),
+    `salt` BINARY(16),
     `registration_timestamp` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     `is_active` BOOLEAN DEFAULT TRUE
 );
@@ -84,10 +85,15 @@ DROP PROCEDURE IF EXISTS `register_user`;
 DELIMITER //
 CREATE PROCEDURE `register_user`(IN `new_name` VARCHAR(100), IN `new_email` VARCHAR(100), IN `new_password` VARCHAR(100))
     BEGIN
-    INSERT INTO `users`(`name`, `email`, `password`) 
-    VALUES(`new_name`, `new_email`, `new_password`);
+
+    SET @salt = UNHEX(MD5(RAND()));
+    
+    INSERT INTO `users`(`name`, `email`, `salt`) 
+    VALUES(`new_name`, `new_email`, @salt);
 
     SET @user_id = LAST_INSERT_ID();
+
+    UPDATE `users` SET `password_hash` = UNHEX(SHA2(CONCAT(`new_password`,@salt),512)) WHERE `id` = @user_id;
 
     INSERT INTO `money_storages`(`type_id`) 
     VALUES((SELECT `ts`.`id` FROM `types_of_money_storages` AS `ts` 
@@ -121,7 +127,7 @@ CREATE PROCEDURE `login`(IN `user_email` VARCHAR(100), IN `user_password` VARCHA
     ON `sa`.`user_id` = `u`.`id`
     JOIN `cushions` AS `c`
     ON `c`.`account_id` = `sa`.`storage_id` 
-    WHERE `email` = `user_email` AND `password` = `user_password`;
+    WHERE `u`.`email` = `user_email` AND UNHEX(SHA2(CONCAT(`user_password`, `u`.`salt`), 512)) = `u`.`password_hash`;
     END//
 DELIMITER ;
 
@@ -171,6 +177,10 @@ DROP PROCEDURE IF EXISTS `withdraw_from_savings_account`;
 DELIMITER //
 CREATE PROCEDURE `withdraw_from_savings_account`(IN `withdrawn_money` INTEGER, IN `savings_account_storage_id` INTEGER)
     BEGIN
+    IF (SELECT `available_money` FROM `savings_accounts` WHERE `storage_id` = `savings_account_storage_id`) < `withdrawn_money` THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Withdrawn money can\'t be greater than the available money in the savings account';
+    END IF;
     UPDATE `savings_accounts`
     SET `available_money` = `available_money` - `withdrawn_money`,
     `total_money` = `total_money` - `withdrawn_money`
@@ -187,6 +197,10 @@ DROP PROCEDURE IF EXISTS `send_money_from_savings_account_to_another_user_saving
 DELIMITER //
 CREATE PROCEDURE `send_money_from_savings_account_to_another_user_savings_account`(IN `recipient_email` VARCHAR(100), IN `sent_money` INTEGER, IN `savings_account_storage_id` INTEGER)
     BEGIN
+    IF (SELECT `available_money` FROM `savings_accounts` WHERE `storage_id` = `savings_account_storage_id`) < `sent_money` THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Sent money can\'t be greater than the available money in the savings account';
+    END IF;
     SET @destination_user_id = (SELECT `id` 
                                 FROM `users` 
                                 WHERE `email` = `recipient_email`);
@@ -208,6 +222,21 @@ CREATE PROCEDURE `send_money_from_savings_account_to_another_user_savings_accoun
     `total_money` = `total_money` + `sent_money`
     WHERE `storage_id` = @destination_storage_id;
     END //
+DELIMITER ;
+
+/*Checks if email exists*/
+
+DROP PROCEDURE IF EXISTS `email_exists`;
+DELIMITER //
+CREATE PROCEDURE `email_exists`(IN `user_email` VARCHAR(100))
+    BEGIN 
+	SET @val = (SELECT COUNT(`id`) FROM `users` WHERE `email` = `user_email` GROUP BY `id`);
+    IF @val IS NULL THEN
+		SELECT 0 AS `exists`;
+	ELSE
+		SELECT 1 AS `exists`;
+	END IF;
+    END//
 DELIMITER ;
 
 /*Cushions*/
@@ -234,6 +263,11 @@ CREATE PROCEDURE `deposit_into_cushion`(IN `deposited_money` INTEGER, IN `cushio
                         FROM `cushions`
                         WHERE `storage_id` = `cushion_storage_id`);
 
+    IF (SELECT `available_money` FROM `savings_accounts` WHERE `storage_id` = @savings_account_storage_id) < `deposited_money` THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Deposited money can\'t be greater than the available money in the savings account';
+    END IF;
+
     INSERT INTO `transactions`(`source_storage_id`, `destination_storage_id`, `money_transferred`)
     VALUES(@savings_account_storage_id, `cushion_storage_id`, `deposited_money`);
 
@@ -253,6 +287,10 @@ DROP PROCEDURE IF EXISTS `withdraw_from_cushion`;
 DELIMITER //
 CREATE PROCEDURE `withdraw_from_cushion`(IN `withdrawn_money` INTEGER, IN `cushion_storage_id` INTEGER)
     BEGIN
+    IF (SELECT `cushion_money` FROM `cushions` WHERE `storage_id` = `cushion_storage_id`) < `withdrawn_money` THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Withdrawn money can\'t be greater than the money stored in the cushion';
+    END IF;
     SET @savings_account_storage_id = (SELECT `account_id`
                         FROM `cushions`
                         WHERE `storage_id` = `cushion_storage_id`);
@@ -334,7 +372,10 @@ CREATE PROCEDURE `deposit_into_pocket`(IN `deposited_money` INTEGER, IN `pocket_
     SET @savings_account_storage_id = (SELECT `account_id`
                         FROM `pockets`
                         WHERE `storage_id` = `pocket_storage_id`);
-
+    IF (SELECT `available_money` FROM `savings_accounts` WHERE `storage_id` = @savings_account_storage_id) < `deposited_money` THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Deposited money can\'t be greater than the available money in the savings account';
+    END IF;
     UPDATE `pockets`
     SET `saved_money` = `saved_money` + `deposited_money`
     WHERE `storage_id` = `pocket_storage_id`;
@@ -354,6 +395,10 @@ DROP PROCEDURE IF EXISTS `withdraw_from_pocket`;
 DELIMITER //
 CREATE PROCEDURE `withdraw_from_pocket`(IN `withdrawn_money` INTEGER, IN `pocket_storage_id` INTEGER)
     BEGIN
+    IF (SELECT `saved_money` FROM `pockets` WHERE `storage_id` = `pocket_storage_id`) < `withdrawn_money` THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Withdrawn money can\'t be greater than the money stored in the pocket';
+    END IF;
     SET @savings_account_storage_id = (SELECT `account_id`
                         FROM `pockets`
                         WHERE `storage_id` = `pocket_storage_id`);
@@ -377,6 +422,10 @@ DROP PROCEDURE IF EXISTS `send_money_from_pocket_to_another_user_savings_account
 DELIMITER //
 CREATE PROCEDURE `send_money_from_pocket_to_another_user_savings_account`(IN `recipient_email` VARCHAR(100), IN `sent_money` INTEGER, IN `pocket_storage_id` INTEGER)
     BEGIN
+    IF (SELECT `saved_money` FROM `pockets` WHERE `storage_id` = `pocket_storage_id`) < `sent_money` THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Sent money can\'t be greater than the money stored in the pocket';
+    END IF;
     SET @destination_user_id = (SELECT `id` 
                                 FROM `users` 
                                 WHERE `email` = `recipient_email`);
@@ -473,7 +522,10 @@ CREATE PROCEDURE `deposit_into_goal`(IN `deposited_money` INTEGER, IN `goal_stor
     SET @savings_account_storage_id = (SELECT `account_id`
                         FROM `goals`
                         WHERE `storage_id` = `goal_storage_id`);
-
+    IF (SELECT `available_money` FROM `savings_accounts` WHERE `storage_id` = @savings_account_storage_id) < `deposited_money` THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Deposited money can\'t be greater than the available money in the savings account';
+    END IF;
     UPDATE `goals`
     SET `saved_money` = `saved_money` + `deposited_money`
     WHERE `storage_id` = `goal_storage_id`;
@@ -489,6 +541,20 @@ CREATE PROCEDURE `deposit_into_goal`(IN `deposited_money` INTEGER, IN `goal_stor
 
     INSERT INTO `transactions`(`source_storage_id`, `destination_storage_id`, `money_transferred`)
     VALUES(@savings_account_storage_id, `goal_storage_id`, `deposited_money`);
+    END //
+DELIMITER ;
+
+/* Validate that input date has the right format and range*/
+
+DROP PROCEDURE IF EXISTS `validate_date`;
+DELIMITER //
+CREATE PROCEDURE `validate_date`(IN `input_date` DATE)
+    BEGIN
+    IF `input_date` BETWEEN CURRENT_DATE + INTERVAL 1 DAY AND '2029-12-31' THEN
+        SELECT 1 AS `valid_date`;
+    ELSE
+        SELECT 0 AS `valid_date`;
+    END IF;
     END //
 DELIMITER ;
 
@@ -608,7 +674,6 @@ CREATE PROCEDURE `history_of_deposits_into_sa_from_another_user_pockets`(IN `sav
     ON `sa`.`user_id` = `u`.`id`;
     END //
 DELIMITER ;
-
 
 
 

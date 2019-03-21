@@ -34,70 +34,9 @@ class PocketsAccess
         results = @db_connection.client.query("CALL `send_money_from_pocket_to_another_user_savings_account`('#{recipient_email}', #{sent_money}, #{pocket_storage_id});")
         @db_connection.client.abandon_results!
     end
+    def email_exists(email)
+        results = @db_connection.client.query("CALL `email_exists`('#{email}');", :symbolize_keys => true)
+        @db_connection.client.abandon_results!
+        results.to_a[0][:exists] == 1 ? (return true) : (return false)
+    end
 end
-
-#tests
-
-# db_connection = DbConnection.new()
-# pockets_access = PocketsAccess.new(db_connection)
-
-# pockets_access.create_pocket('Karts', 1)
-# db_connection.client.abandon_results!
-
-# bolsillos = pockets_access.list_pockets(1)
-# db_connection.client.abandon_results!
-# pocket_storage_id = bolsillos[0][:storage_id]
-# puts bolsillos
-
-# pockets_access.deposit_into_pocket(200000, pocket_storage_id)
-# db_connection.client.abandon_results!
-# bolsillos = pockets_access.list_pockets(1)
-# db_connection.client.abandon_results!
-# puts bolsillos
-
-# pockets_access.withdraw_from_pocket(190000, pocket_storage_id)
-# db_connection.client.abandon_results!
-# bolsillos = pockets_access.list_pockets(1)
-# db_connection.client.abandon_results!
-# puts bolsillos
-
-# pockets_access.send_money_to_another_user_savings_account('stiven@gmail.com', 5000, pocket_storage_id)
-# db_connection.client.abandon_results!
-# bolsillos = pockets_access.list_pockets(1)
-# db_connection.client.abandon_results!
-# puts bolsillos
-
-# pockets_access.delete_pocket(pocket_storage_id)
-# bolsillos = pockets_access.list_pockets(1)
-# db_connection.client.abandon_results!
-# puts bolsillos
-
-
-# pockets_access.create_pocket('Cine', 1)
-# db_connection.client.abandon_results!
-
-# bolsillos = pockets_access.list_pockets(1)
-# db_connection.client.abandon_results!
-# pocket_storage_id = bolsillos[0][:storage_id]
-# puts bolsillos
-
-# pockets_access.deposit_into_pocket(80000, pocket_storage_id)
-# db_connection.client.abandon_results!
-# bolsillos = pockets_access.list_pockets(1)
-# db_connection.client.abandon_results!
-# puts bolsillos
-
-
-# pockets_access.create_pocket('Transporte', 3)
-# db_connection.client.abandon_results!
-
-# bolsillos = pockets_access.list_pockets(3)
-# db_connection.client.abandon_results!
-# pocket_storage_id = bolsillos[0][:storage_id]
-# puts bolsillos
-
-# pockets_access.deposit_into_pocket(40000, pocket_storage_id)
-# db_connection.client.abandon_results!
-# bolsillos = pockets_access.list_pockets(1)
-# db_connection.client.abandon_results!
-# puts bolsillos

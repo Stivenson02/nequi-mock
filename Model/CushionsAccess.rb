@@ -21,28 +21,3 @@ class CushionsAccess
     end
 end
 
-#tests
-
-# db_connection = DbConnection.new()
-# cushions_access = CushionsAccess.new(db_connection)
-
-# cushions_access.deposit_into_cushion(500000, 2)
-# db_connection.client.abandon_results!
-
-# cushions_access.deposit_into_cushion(100000, 4)
-# db_connection.client.abandon_results!
-
-# cushions_access.withdraw_from_cushion(100000, 2)
-# db_connection.client.abandon_results!
-
-# cushions_access.withdraw_from_cushion(20000, 4)
-# db_connection.client.abandon_results!
-
-# puts cushions_access.look_up_cushion_money(2)
-# db_connection.client.abandon_results!
-
-# puts cushions_access.look_up_cushion_money(4)
-# db_connection.client.abandon_results!
-
-
-
